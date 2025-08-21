@@ -32,6 +32,7 @@ module.exports = async (HazelXmichie, m) => {
     const pushname = m.pushName || `${senderNumber}`;
     const isBot = botNumber.includes(senderNumber);
 
+    // Helper functions
     const reply = (text) => HazelXmichie.sendMessage(m.chat, { text }, { quoted: m });
     const runtime = function(seconds) {
       seconds = Number(seconds);
@@ -61,11 +62,12 @@ module.exports = async (HazelXmichie, m) => {
       case 'menuawal': {
         await HazelXmichie.sendMessage(m.chat, { react: { text: `⏱️`, key: m.key } });
 
+        // Default values jika global variable tidak ada
         const botName = global.namabot || 'HazelBot';
         const ownerName = global.namaown || global.own || 'HazelXmichie';
         const ownerNumber = global.owner ? global.owner[0] : '6285183131924';
 
-        let uptime = runtime(process.uptime()); 
+        let uptime = runtime(process.uptime());
 
         let menuText = `*ʜᴀʟᴏ ${pushname}.*  
 ɴᴀᴍᴀ ꜱᴀʏᴀ ᴀᴅᴀʟᴀʜ *${botName}*, ꜱᴀʏᴀ ᴀᴅᴀʟᴀʜ ᴀꜱɪꜱꜱᴛᴇɴ ʏᴀɴɢ ꜱɪᴀᴘ ᴍᴇʟᴀʏᴀɴɪ ᴋᴀᴍᴜ 24ᴊᴀᴍ
@@ -92,8 +94,7 @@ module.exports = async (HazelXmichie, m) => {
 ᴊɪᴋᴀ ᴀᴅᴀ ᴍᴀꜱᴀʟᴀʜ, ꜱɪʟᴀᴋᴀɴ ᴋᴇᴛɪᴋ *.ᴏᴡɴᴇʀ*`;
 
         await HazelXmichie.sendMessage(m.chat, {
-          image: fs.readFileSync('./media/michie.jpg'),
-          caption: menuText,
+          text: menuText,
           contextInfo: {
             forwardingScore: 1,
             isForwarded: true,
@@ -177,7 +178,8 @@ ${Object.keys(cpu.times).map(type => `✧ ${type.toLowerCase().padEnd(6)} : *${(
       
       case 'getpp': {
         let userss = m.mentionedJid[0] ? m.mentionedJid[0] : m.quoted ? m.quoted.sender : text.replace(/[^0-9]/g, '') + '@s.whatsapp.net';
-             
+        
+        // Jika tidak ada user yang disebutkan/dibalas, gunakan sender
         if (!userss || userss === '@s.whatsapp.net') {
             userss = m.sender;
         }
@@ -262,6 +264,7 @@ ${Object.keys(cpu.times).map(type => `✧ ${type.toLowerCase().padEnd(6)} : *${(
         let [peenis, pepekk = "200"] = text.split("|");
         let target = peenis.replace(/[^0-9]/g, '').trim();
         
+        // Hanya untuk owner bot
         if (!isCreator) return reply("Perintah ini hanya untuk owner bot");
         
         try {
@@ -316,6 +319,7 @@ ${Object.keys(cpu.times).map(type => `✧ ${type.toLowerCase().padEnd(6)} : *${(
       }
 
       default:
+        // Do nothing for unhandled commands
     }
   } catch (err) {
     console.log(util.format(err));
