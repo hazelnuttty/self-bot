@@ -11,6 +11,8 @@
     "@hapi/boom": "latest",
     "@whiskeysockets/baileys": "latest",
     "awesome-phonenumber": "latest",
-    "pino": "latest"
+    "pino": "latest",
+    "form-data": "latest",
+    "axios": "latest"
   }
 }
