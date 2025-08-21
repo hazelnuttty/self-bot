@@ -66,10 +66,7 @@ module.exports = async (HazelXmichie, m) => {
       case 'ping':
       case 'botstatus':
       case 'statusbot': {
-        if (!global.userData || !global.userData[m.sender]) {
-          return reply(`kamu belum terdaftar~\nsilakan daftar dulu: *${prefix}daftar nama|umur*\n\ncontoh: *.daftar Michie|16*`);
-        }
-
+        // Hapus pengecekan registrasi di sini
         const used = process.memoryUsage();
         const cpus = os.cpus().map(cpu => {
           cpu.total = Object.keys(cpu.times).reduce((last, type) => last + cpu.times[type], 0);
