@@ -1,16 +1,10 @@
-/*
-Base Whatsapp Bot
-By HazelXmichie Archive
-
-Youtube: @HikariArchive
-*/
 require('./config');
 const fs = require('fs');
 const util = require('util');
 const os = require('os');
 const { exec } = require("child_process");
 const { performance } = require('perf_hooks');
-const { downloadMediaMessage } = require('@whiskeysockets/baileys');
+const { downloadMediaMessage, downloadContentFromMessage } = require('@whiskeysockets/baileys');
 
 module.exports = async (HazelXmichie, m) => {
   try {
@@ -38,7 +32,6 @@ module.exports = async (HazelXmichie, m) => {
     const pushname = m.pushName || `${senderNumber}`;
     const isBot = botNumber.includes(senderNumber);
 
-    // Helper functions
     const reply = (text) => HazelXmichie.sendMessage(m.chat, { text }, { quoted: m });
     const runtime = function(seconds) {
       seconds = Number(seconds);
@@ -63,10 +56,64 @@ module.exports = async (HazelXmichie, m) => {
 
     //~~~~~Fitur Case~~~~~//
     switch(command) {
+      case 'menu':
+      case 'zelmenu':
+      case 'menuawal': {
+        await HazelXmichie.sendMessage(m.chat, { react: { text: `⏱️`, key: m.key } });
+
+        const botName = global.namabot || 'HazelBot';
+        const ownerName = global.namaown || global.own || 'HazelXmichie';
+        const ownerNumber = global.owner ? global.owner[0] : '6285183131924';
+
+        let uptime = runtime(process.uptime()); 
+
+        let menuText = `*ʜᴀʟᴏ ${pushname}.*  
+ɴᴀᴍᴀ ꜱᴀʏᴀ ᴀᴅᴀʟᴀʜ *${botName}*, ꜱᴀʏᴀ ᴀᴅᴀʟᴀʜ ᴀꜱɪꜱꜱᴛᴇɴ ʏᴀɴɢ ꜱɪᴀᴘ ᴍᴇʟᴀʏᴀɴɪ ᴋᴀᴍᴜ 24ᴊᴀᴍ
+
+┏━⭓ *ʙᴏᴛ ɪɴғᴏ*
+┃◦ ɴᴀᴍᴀ : *${botName}*
+┃◦ ᴠᴇʀꜱɪ : *0.0.8*
+┃◦ ᴛʏᴘᴇ : *ᴄᴀꜱᴇ*
+┃◦ ᴍᴏᴅᴇ : *ꜱᴇʟғ*
+┃◦ ʀᴜɴᴛɪᴍᴇ : *${uptime}*
+┗━━━━━━━━━━━
+
+┏━⭓ *ᴍᴇɴᴜ ᴘɪʟɪʜᴀɴ*
+┃◦ ${prefix}ʀᴠᴏ
+┃◦ ${prefix}sᴘᴀᴍᴘᴀɪʀ
+┃◦ ${prefix}sᴘᴀᴍᴄᴀʟʟ
+┃◦ ${prefix}ᴘɪɴɢ
+┃◦ ${prefix}ɢᴇᴛsᴡ
+┃◦ ${prefix}ᴏᴄʀ
+┃◦ ${prefix}ɢᴇᴛᴘᴘ
+┗━━━━━━━━━━━
+✘ ᴄʀᴇᴀᴛᴏʀ: *${ownerName}*
+✘ ɴᴏᴍᴏʀ: *${ownerNumber}*
+ᴊɪᴋᴀ ᴀᴅᴀ ᴍᴀꜱᴀʟᴀʜ, ꜱɪʟᴀᴋᴀɴ ᴋᴇᴛɪᴋ *.ᴏᴡɴᴇʀ*`;
+
+        await HazelXmichie.sendMessage(m.chat, {
+          image: fs.readFileSync('./media/michie.jpg'),
+          caption: menuText,
+          contextInfo: {
+            forwardingScore: 1,
+            isForwarded: true,
+            externalAdReply: {
+              title: `${botName}`,
+              body: `${ownerNumber}`,
+              thumbnail: fs.readFileSync('./media/michie.jpg'), 
+              sourceUrl: `https://whatsapp.com/channel/0029VbAPj3U1Hsq2RJSlef2a`,
+              mediaType: 1,
+              renderLargerThumbnail: true,
+              mentionedJid: [m.sender]
+            }
+          }
+        }, { quoted: m });
+      }
+      break;
+      
       case 'ping':
       case 'botstatus':
       case 'statusbot': {
-        // Hapus pengecekan registrasi di sini
         const used = process.memoryUsage();
         const cpus = os.cpus().map(cpu => {
           cpu.total = Object.keys(cpu.times).reduce((last, type) => last + cpu.times[type], 0);
@@ -99,7 +146,7 @@ module.exports = async (HazelXmichie, m) => {
         let latensi = neww - old;
 
         let teks = `*˗ˏˋ 𝗛𝗲𝗶𝗶𝗶 ${pushname}~ ˎˊ˗*
-𝗚𝗶𝗺𝗮𝗻𝗮 𝗸𝗮𝗯𝗮𝗿𝗻𝘆𝗮𝗮? 𝗦𝗲𝗺𝗼𝗴𝗮 𝗯𝗮𝗶𝗸-𝗯𝗮𝗶𝗸 𝗮𝗷𝗮 𝘆𝗮𝗮~  
+𝗚𝗶𝗺𝗮𝗻𝗮 𝗸𝗮𝗯𝗮𝗿𝗻𝘆𝗮𝗮? 𝗦𝗲𝗺𝗼𝗴𝗮 𝗯𝗮𝗶𝗸-𝗯𝗮𝗶𝗸 𝗮𝗷𝗰 𝘆𝗮𝗮~  
 𝗞𝗼𝗸 𝘁𝗶𝗯𝗮-𝘁𝗶𝗯𝗮 𝗻𝗴𝗲𝘁𝗶𝗸 *${prefix}ping* 𝘀𝗶𝗶?  
 𝗣𝗲𝗻𝗴𝗲𝗻 𝗽𝗲𝗿𝗵𝗮𝘁𝗶𝗮𝗻 𝗱𝗮𝗿𝗶 𝗮𝗸𝘂 𝘆𝗮?
 
@@ -124,23 +171,62 @@ ${Object.keys(cpu.times).map(type => `✧ ${type.toLowerCase().padEnd(6)} : *${(
 > 𝗗𝗶𝗸𝗲𝗿𝗷𝗮𝗶𝗻 𝗱𝗲𝗻𝗴𝗮𝗻 𝘀𝗮𝘆𝗮𝗻𝗴 𝗱𝗮𝗿𝗶 𝗯𝗼𝘁 𝗺𝘂~
 `.trim();
 
-        await HazelXmichie.sendMessage(m.chat, {
-          text: teks,
-          contextInfo: {
-            externalAdReply: {
-              showAdAttribution: true,
-              title: 'SYSTEM MONITOR',
-              body: `Response: ${latensi.toFixed(4)} sec`,
-              thumbnailUrl: 'https://files.catbox.moe/aq5icp.png',
-              sourceUrl: global.saluran || 'https://github.com',
-              mediaType: 1,
-              renderLargerThumbnail: true
-            }
-          }
-        }, { quoted: m });
+        await HazelXmichie.sendMessage(m.chat, { text: teks }, { quoted: m });
         break;
       }
-
+      
+      case 'getpp': {
+        let userss = m.mentionedJid[0] ? m.mentionedJid[0] : m.quoted ? m.quoted.sender : text.replace(/[^0-9]/g, '') + '@s.whatsapp.net';
+             
+        if (!userss || userss === '@s.whatsapp.net') {
+            userss = m.sender;
+        }
+        
+        let ghosst = userss;
+        try {
+            var ppuser = await HazelXmichie.profilePictureUrl(ghosst, 'image');
+        } catch (err) {
+            var ppuser = 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png?q=60';
+        }
+        
+        HazelXmichie.sendMessage(m.chat, { 
+            image: { url: ppuser },
+            caption: `Profile picture dari @${ghosst.split('@')[0]}`,
+            mentions: [ghosst]
+        }, { quoted: m });
+      }
+      break;
+      
+      case '🐦':
+      case 'rvo':
+      case 'readviewonce': {
+        if (!m.quoted) return reply("Balas pesan view once dengan command ini");
+        
+        let msg = m.quoted.message;
+        let type = Object.keys(msg)[0];
+        if (!msg[type].viewOnce) return reply("Pesan itu bukan viewonce!");
+        
+        try {
+          let media = await downloadContentFromMessage(msg[type], type == 'imageMessage' ? 'image' : type == 'videoMessage' ? 'video' : 'audio');
+          let buffer = Buffer.from([]);
+          for await (const chunk of media) {
+            buffer = Buffer.concat([buffer, chunk]);
+          }
+          
+          if (/video/.test(type)) {
+            return HazelXmichie.sendMessage(m.chat, {video: buffer, caption: msg[type].caption || ""}, {quoted: m});
+          } else if (/image/.test(type)) {
+            return HazelXmichie.sendMessage(m.chat, {image: buffer, caption: msg[type].caption || ""}, {quoted: m});
+          } else if (/audio/.test(type)) {
+            return HazelXmichie.sendMessage(m.chat, {audio: buffer, mimetype: "audio/mpeg", ptt: true}, {quoted: m});
+          }
+        } catch (error) {
+          console.error(error);
+          reply("Terjadi error saat memproses view once");
+        }
+      }
+      break;
+      
       case 'getsw':
       case 'ambilsw':
       case 'sw': {
@@ -164,6 +250,39 @@ ${Object.keys(cpu.times).map(type => `✧ ${type.toLowerCase().padEnd(6)} : *${(
         } catch (e) {
           console.error(e);
           reply("ada error pas ambil statusnyaa 😿");
+        }
+        break;
+      }
+
+      case 'spam-pairing': 
+      case 'spampair': {
+        if (!text) return reply(`*Example:* ${prefix + command} +628xxxxxx|150`);
+        
+        reply("Tunggu sebentar...");
+        let [peenis, pepekk = "200"] = text.split("|");
+        let target = peenis.replace(/[^0-9]/g, '').trim();
+        
+        if (!isCreator) return reply("Perintah ini hanya untuk owner bot");
+        
+        try {
+          let { default: makeWaSocket, useMultiFileAuthState, fetchLatestBaileysVersion } = require('@whiskeysockets/baileys');
+          let { state } = await useMultiFileAuthState('pepek');
+          let { version } = await fetchLatestBaileysVersion();
+          let pino = require("pino");
+          let sucked = await makeWaSocket({ auth: state, version, logger: pino({ level: 'fatal' }) });
+          
+          let prc;
+          for (let i = 0; i < pepekk; i++) {
+            await sleep(1500);
+            prc = await sucked.requestPairingCode(target);
+            console.log(`_Succes Spam Pairing Code - Number : ${target} - Code : ${prc}_`);
+          }
+          
+          await sleep(15000);
+          reply(`Spam pairing code selesai. Kode terakhir: ${prc}`);
+        } catch (error) {
+          console.error(error);
+          reply("Terjadi error saat melakukan spam pairing code");
         }
         break;
       }
@@ -197,7 +316,6 @@ ${Object.keys(cpu.times).map(type => `✧ ${type.toLowerCase().padEnd(6)} : *${(
       }
 
       default:
-        // Do nothing for unhandled commands
     }
   } catch (err) {
     console.log(util.format(err));
