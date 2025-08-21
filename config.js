@@ -1,4 +1,5 @@
-global.owner = ["6285183131924"] 
+global.owner = ['6281234567890'];
+global.saluran = 'https://example.com';
 global.bot = "6285220154383"
 global.namabot = "MICHIE - SELF BOT" 
 global.namaown = "HAZEL BUKAN TUKANG BAK"
