@@ -1,13 +1,10 @@
-const { default: makeWASocket, DisconnectReason, makeInMemoryStore, jidDecode, proto, getContentType, useMultiFileAuthState, downloadContentFromMessage } = require("@whiskeysockets/baileys")
+const { default: makeWASocket, DisconnectReason, jidDecode, proto, getContentType, useMultiFileAuthState, downloadContentFromMessage } = require("@whiskeysockets/baileys")
 const pino = require('pino')
 const { Boom } = require('@hapi/boom')
 const fs = require('fs')
 const readline = require("readline");
 const PhoneNumber = require('awesome-phonenumber')
 const chalk = require('chalk')
-
-// Fix: makeInMemoryStore is a named export, not a default export
-const store = makeInMemoryStore({ logger: pino().child({ level: 'silent', stream: 'store' }) })
 
 const question = (text) => { const rl = readline.createInterface({ input: process.stdin, output: process.stdout }); return new Promise((resolve) => { rl.question(text, resolve) }) };
 
@@ -58,7 +55,14 @@ if (!HazelXmichie.authState.creds.registered) {
   console.log(`Pairing Kode Anda :`, code);
 }
 
-store.bind(HazelXmichie.ev)
+// Simpan kontak secara lokal sebagai pengganti store
+const contacts = {};
+
+HazelXmichie.ev.on('contacts.update', updates => {
+  for (const update of updates) {
+    contacts[update.id] = {...contacts[update.id], ...update};
+  }
+});
 
 HazelXmichie.ev.on('messages.upsert', async chatUpdate => {
 try {
@@ -69,14 +73,16 @@ if (mek.key && mek.key.remoteJid === 'status@broadcast') return
 if (!HazelXmichie.public && !mek.key.fromMe && chatUpdate.type === 'notify') return
 if (mek.key.id.startsWith('BAE5') && mek.key.id.length === 16) return
 
-const m = smsg(HazelXmichie, mek, store)
+const m = smsg(HazelXmichie, mek, contacts)
 const pushname = m.pushName || 'Unknown'
 const budy = (typeof m.text === 'string' ? m.text : '')
 
 // Log pesan
 if (m.message && m.isGroup) {
-    const groupName = await HazelXmichie.groupMetadata(m.chat).then(metadata => metadata.subject).catch(() => 'Unknown Group')
-    console.log(`
+    try {
+        const groupMetadata = await HazelXmichie.groupMetadata(m.chat);
+        const groupName = groupMetadata.subject || 'Unknown Group';
+        console.log(`
 ┌────────── [ GROUP CHAT LOG ] ──────────┐
 │ 🕒 Time      : ${chalk.green(new Date().toISOString().slice(0, 19).replace('T', ' '))}
 │ 📝 Message   : ${chalk.blue(budy || m.mtype)}
@@ -84,6 +90,9 @@ if (m.message && m.isGroup) {
 │ 🏠 Group     : ${chalk.yellow(groupName)} (${chalk.cyan(m.chat)})
 └────────────────────────────────────────┘
     `);
+    } catch (err) {
+        console.log('Error fetching group metadata:', err);
+    }
 } else if (m.message && !m.isGroup) {
     console.log(`
 ┌───────── [ PRIVATE CHAT LOG ] ─────────┐
@@ -94,7 +103,7 @@ if (m.message && m.isGroup) {
     `);
 }
 
-require("./case")(HazelXmichie, m, chatUpdate, store)
+require("./case")(HazelXmichie, m, chatUpdate, contacts)
 } catch (err) {
 console.log(err)
 }
@@ -108,27 +117,31 @@ return decode.user && decode.server && decode.user + '@' + decode.server || jid
 } else return jid
 }
 
-HazelXmichie.getName = (jid, withoutContact = false) => {
+HazelXmichie.getName = async (jid, withoutContact = false) => {
 id = HazelXmichie.decodeJid(jid)
 withoutContact = HazelXmichie.withoutContact || withoutContact 
 let v
-if (id.endsWith("@g.us")) return new Promise(async (resolve) => {
-v = store.contacts[id] || {}
-if (!(v.name || v.subject)) v = HazelXmichie.groupMetadata(id) || {}
-resolve(v.name || v.subject || PhoneNumber('+' + id.replace('@s.whatsapp.net', '')).getNumber('international'))
-})
-else v = id === '0@s.whatsapp.net' ? {
-id,
-name: 'WhatsApp'
-} : id === HazelXmichie.decodeJid(HazelXmichie.user.id) ?
-HazelXmichie.user :
-(store.contacts[id] || {})
-return (withoutContact ? '' : v.name) || v.subject || v.verifiedName || PhoneNumber('+' + jid.replace('@s.whatsapp.net', '')).getNumber('international')
+if (id.endsWith("@g.us")) {
+  try {
+    v = await HazelXmichie.groupMetadata(id) || {};
+    return v.subject || PhoneNumber('+' + id.replace('@s.whatsapp.net', '')).getNumber('international');
+  } catch (err) {
+    return PhoneNumber('+' + id.replace('@s.whatsapp.net', '')).getNumber('international');
+  }
+} else {
+  v = id === '0@s.whatsapp.net' ? {
+    id,
+    name: 'WhatsApp'
+  } : id === HazelXmichie.decodeJid(HazelXmichie.user.id) ?
+  HazelXmichie.user :
+  (contacts[id] || {});
+  return (withoutContact ? '' : v.name) || v.verifiedName || PhoneNumber('+' + jid.replace('@s.whatsapp.net', '')).getNumber('international');
+}
 }
 
 HazelXmichie.public = true
 
-HazelXmichie.serializeM = (m) => smsg(HazelXmichie, m, store);
+HazelXmichie.serializeM = (m) => smsg(HazelXmichie, m, contacts);
 
 //~~~~~Memeriksa Koneksi~~~~~//
 HazelXmichie.ev.on('connection.update', (update) => {
@@ -168,7 +181,7 @@ return HazelXmichie
 
 StartHazelXmichie()
 
-function smsg(HazelXmichie, m, store) {
+function smsg(HazelXmichie, m, contacts) {
 if (!m) return m
 let M = proto.WebMessageInfo
 if (m.key) {
@@ -206,8 +219,9 @@ m.quoted.text = m.quoted.text || m.quoted.caption || m.quoted.conversation || m.
 m.quoted.mentionedJid = m.msg.contextInfo ? m.msg.contextInfo.mentionedJid : []
 m.getQuotedObj = m.getQuotedMessage = async () => {
 if (!m.quoted.id) return false
-let q = await store.loadMessage(m.chat, m.quoted.id, HazelXmichie)
- return smsg(HazelXmichie, q, store)
+// Tanpa store, kita tidak bisa mengambil pesan yang dikutip dari history
+// Jadi kita mengembalikan objek yang sudah ada
+return m.quoted;
 }
 let vM = m.quoted.fakeObj = M.fromObject({
 key: {
