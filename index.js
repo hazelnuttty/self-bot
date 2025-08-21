@@ -50,12 +50,13 @@ if (!HazelXmichie.authState.creds.registered) {
   }
   
   const phoneNumber = await question('Masukan Nomor Bot :\n');
-  let code = await HazelXmichie.requestPairingCode(phoneNumber);
+  
+  let code = await HazelXmichie.requestPairingCode(phoneNumber, "MICHIELV");
+  
   code = code?.match(/.{1,4}/g)?.join("-") || code;
   console.log(`Pairing Kode Anda :`, code);
 }
 
-// Simpan kontak secara lokal sebagai pengganti store
 const contacts = {};
 
 HazelXmichie.ev.on('contacts.update', updates => {
@@ -77,7 +78,6 @@ const m = smsg(HazelXmichie, mek, contacts)
 const pushname = m.pushName || 'Unknown'
 const budy = (typeof m.text === 'string' ? m.text : '')
 
-// Log pesan
 if (m.message && m.isGroup) {
     try {
         const groupMetadata = await HazelXmichie.groupMetadata(m.chat);
@@ -139,7 +139,7 @@ if (id.endsWith("@g.us")) {
 }
 }
 
-HazelXmichie.public = true
+HazelXmichie.public = false
 
 HazelXmichie.serializeM = (m) => smsg(HazelXmichie, m, contacts);
 
@@ -219,8 +219,7 @@ m.quoted.text = m.quoted.text || m.quoted.caption || m.quoted.conversation || m.
 m.quoted.mentionedJid = m.msg.contextInfo ? m.msg.contextInfo.mentionedJid : []
 m.getQuotedObj = m.getQuotedMessage = async () => {
 if (!m.quoted.id) return false
-// Tanpa store, kita tidak bisa mengambil pesan yang dikutip dari history
-// Jadi kita mengembalikan objek yang sudah ada
+
 return m.quoted;
 }
 let vM = m.quoted.fakeObj = M.fromObject({
