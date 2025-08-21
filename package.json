@@ -1,0 +1,16 @@
+{
+  "name": "HAZEL - MICHIE",
+  "version": "1.0.0",
+  "description": "Base bot self by Hazel",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "HAZELOFFC",
+  "dependencies": {
+    "@hapi/boom": "latest",
+    "@whiskeysockets/baileys": "latest",
+    "awesome-phonenumber": "latest",
+    "pino": "latest"
+  }
+}
