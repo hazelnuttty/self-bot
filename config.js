@@ -1,8 +1,9 @@
-global.owner = ['6281234567890'];
+global.owner = ['6285183131924'];
 global.saluran = 'https://example.com';
-global.bot = "6285220154383"
+global.bot = "6285183131924"
 global.namabot = "MICHIE - SELF BOT" 
 global.namaown = "HAZEL BUKAN TUKANG BAK"
+global.idch = "120363403378232838@newsletter"
 
 let fs = require('fs')
 let file = require.resolve(__filename)
