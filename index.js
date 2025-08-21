@@ -6,6 +6,7 @@ const readline = require("readline");
 const PhoneNumber = require('awesome-phonenumber')
 const chalk = require('chalk')
 
+// Fix: makeInMemoryStore is a named export, not a default export
 const store = makeInMemoryStore({ logger: pino().child({ level: 'silent', stream: 'store' }) })
 
 const question = (text) => { const rl = readline.createInterface({ input: process.stdin, output: process.stdout }); return new Promise((resolve) => { rl.question(text, resolve) }) };
